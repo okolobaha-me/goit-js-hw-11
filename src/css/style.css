@@ -40,9 +40,8 @@ li {
   margin: 0 auto;
 }
 
-/* todo should change to some class*/
 .photo {
-  max-height: 205px;
+  height: 205px;
   margin: 0 auto;
 }
 
@@ -66,4 +65,9 @@ p {
   border-radius: 5px;
   box-shadow: 0px 3px 3px rgba(44, 44, 44, 0.29);
   max-height: 280px;
+}
+
+.trigger {
+  width: 1px;
+  margin-top: -300px;
 }

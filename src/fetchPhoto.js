@@ -5,9 +5,8 @@ export default async function fetchPhoto(name, page) {
     image_type: 'photo',
     orientation: 'horizontal',
     per_page: '40',
-    page: page,
+    page,
   });
-
   const photo = await fetch(`https://pixabay.com/api/?${options}`);
   return photo;
 }

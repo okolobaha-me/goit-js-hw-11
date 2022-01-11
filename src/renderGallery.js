@@ -1,5 +1,6 @@
 export default function renderPhotoList(photos) {
   const photoListHtml = [];
+
   for (const photo of photos) {
     photoListHtml.push(renderPhotoCard(photo));
   }
