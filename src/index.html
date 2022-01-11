@@ -10,8 +10,22 @@
       integrity="sha512-ISS7cAi1PEhQ8jnbJpJZMd29NlhNj4AWYyLOSp2CE/CsHxTCu+r+t0D2yoJudVrd0/8fTVPUVDzY5Tvli75u/g=="
       crossorigin="anonymous"
     />
+    <link rel="stylesheet" href="./css/style.css" />
   </head>
   <body>
+    <form class="search-form" id="search-form">
+      <input
+        type="text"
+        name="searchQuery"
+        autocomplete="off"
+        placeholder="Search images..."
+        class="input"
+      />
+      <button type="submit" class="searchBtn">Search</button>
+    </form>
+
+    <div class="gallery"></div>
+    <a href="https://pixabay.com/api/" class="new-page"></a>
     <script src="./index.js"></script>
   </body>
 </html>
