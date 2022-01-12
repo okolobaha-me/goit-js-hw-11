@@ -18,8 +18,6 @@ const refs = {
 let pageCounter = 0;
 let maxPage = 1;
 
-let links = {};
-
 function addPhotosToGallery(photos) {
   refs.gallery.insertAdjacentHTML('beforeend', renderGallery(photos, pageCounter));
 }
@@ -98,14 +96,16 @@ function updateLightBox() {
 
 const onclickSearchBtn = async e => {
   e.preventDefault();
+  if (!refs.input.value.trim()) return;
+
   pageCounter = 1;
+  clearGallery();
+
   const fetchOptions = {
     name: refs.input.value,
     page: pageCounter,
     per_page: PHOTOS_PER_PAGE,
   };
-
-  clearGallery();
 
   const photos = await getPhotosList(fetchOptions);
   if (isEmpty(photos.total)) {
