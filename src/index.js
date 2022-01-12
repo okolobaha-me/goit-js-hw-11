@@ -80,18 +80,19 @@ async function loadMorePhotos() {
   pageCounter++;
 }
 
-function checkLightBoxEnd() {
-  const currentPage = document.querySelector('.sl-current');
-  const total = document.querySelector('.sl-total');
-  if (currentPage.textContent === total.textContent) {
-    lightbox.destroy();
-    loadMorePhotos();
-  }
-}
+//was trying to load more photos when ligthbox gallery end
+// function checkLightBoxEnd() {
+//   const currentPage = document.querySelector('.sl-current');
+//   const total = document.querySelector('.sl-total');
+//   if (currentPage.textContent === total.textContent) {
+//     lightbox.destroy();
+//     loadMorePhotos();
+//   }
+// }
 
 function updateLightBox() {
   lightbox.refresh();
-  lightbox.on('nextDone.simplelightbox', checkLightBoxEnd);
+  // lightbox.on('nextDone.simplelightbox', checkLightBoxEnd);
 }
 
 const onclickSearchBtn = async e => {
@@ -120,10 +121,10 @@ const onclickSearchBtn = async e => {
   updateLightBox();
 };
 
-const observerFunc = async entries => {
+const observerFunc = entries => {
   if (entries[0].intersectionRatio <= 0) return;
 
-  await loadMorePhotos();
+  loadMorePhotos();
 };
 
 refs.form.addEventListener('submit', onclickSearchBtn);
