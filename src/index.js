@@ -48,6 +48,51 @@ function isGalleryEnd() {
   return pageCounter > maxPage;
 }
 
+function scrollWindow() {
+  const { height: cardHeight } = document
+    .querySelector('.gallery')
+    .firstElementChild.getBoundingClientRect();
+
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: 'smooth',
+  });
+}
+
+async function loadMorePhotos() {
+  if (isGalleryEnd()) {
+    intersectionObserver.disconnect();
+    messages.galleryEnd();
+    return;
+  }
+
+  const fetchOptions = {
+    name: refs.input.value,
+    page: pageCounter,
+    per_page: PHOTOS_PER_PAGE,
+  };
+
+  const photos = await getPhotosList(fetchOptions);
+
+  addPhotosToGallery(photos.list);
+  updateLightBox();
+  scrollWindow();
+  pageCounter++;
+}
+
+function checkLightBoxEnd() {
+  const currentPage = document.querySelector('.sl-current');
+  const total = document.querySelector('.sl-total');
+  if (currentPage.textContent === total.textContent) {
+    loadMorePhotos();
+  }
+}
+
+function updateLightBox() {
+  lightbox.refresh();
+  lightbox.on('next.simplelightbox', checkLightBoxEnd);
+}
+
 const onclickSearchBtn = async e => {
   e.preventDefault();
   pageCounter = 1;
@@ -71,44 +116,29 @@ const onclickSearchBtn = async e => {
   pageCounter += 1;
   createTriggerDiv();
   addObserverToTriggerDiv();
-  lightbox.refresh();
+  updateLightBox();
 };
 
 const observerFunc = async entries => {
-  if (isGalleryEnd()) {
-    intersectionObserver.disconnect();
-    messages.galleryEnd();
-    return;
-  }
-
   if (entries[0].intersectionRatio <= 0) return;
 
-  const fetchOptions = {
-    name: refs.input.value,
-    page: pageCounter,
-    per_page: PHOTOS_PER_PAGE,
-  };
-
-  const photos = await getPhotosList(fetchOptions);
-
-  addPhotosToGallery(photos.list);
-  lightbox.refresh();
-  pageCounter++;
+  loadMorePhotos();
 };
 
 refs.form.addEventListener('submit', onclickSearchBtn);
 
 const intersectionObserver = new IntersectionObserver(observerFunc);
 
-const lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250 });
+const lightbox = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionDelay: 250,
+  preloading: false,
+});
 
 const onClickImg = e => {
   if (e.target.nodeName !== 'img') {
-    console.log(e.target.nodeName);
-    lightbox.open(e.target);
     e.preventDefault();
   }
-  console.log(e.target.nodeName);
 };
 
 refs.gallery.addEventListener('click', onClickImg);
