@@ -1,5 +1,13 @@
-import fetchPhoto from './fetchPhoto';
 import renderGallery from './renderGallery';
+import getPhotosList from './getPhotos';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
+import Messages from './messages';
+
+const NEW_PAGE_DISTANCE = 300;
+const PHOTOS_PER_PAGE = 40;
+const TRIGGER_DIV = `<div class='trigger' style='margin-top: -${NEW_PAGE_DISTANCE}px;'></div>`;
+const messages = new Messages();
 
 const refs = {
   input: document.querySelector('.input'),
@@ -7,39 +15,83 @@ const refs = {
   gallery: document.querySelector('.gallery'),
 };
 
-let counter = 0;
+let pageCounter = 0;
+let maxPage = 1;
 
-const getPhotos = async () => {
-  const response = await fetchPhoto(refs.input.value, counter);
-  const photos = await response.json();
+function addPhotosToGallery(photos) {
+  refs.gallery.insertAdjacentHTML('beforeend', renderGallery(photos, pageCounter));
+}
 
-  return photos.hits;
-};
+function clearGallery() {
+  refs.gallery.innerHTML = '';
+}
+
+function isEmpty(count) {
+  return !count;
+}
+
+function createTriggerDiv() {
+  refs.gallery.insertAdjacentHTML('afterend', TRIGGER_DIV);
+}
+
+function setMaxPage(total) {
+  maxPage = Math.ceil(total / PHOTOS_PER_PAGE);
+}
+
+function addObserverToTriggerDiv() {
+  intersectionObserver.observe(document.querySelector('.trigger'));
+}
+
+function isGalleryEnd() {
+  return pageCounter > maxPage;
+}
 
 const onclickSearchBtn = async e => {
   e.preventDefault();
+  pageCounter = 1;
+  const fetchOptions = {
+    name: refs.input.value,
+    page: pageCounter,
+    per_page: PHOTOS_PER_PAGE,
+  };
 
-  counter = 1;
+  clearGallery();
 
-  const photos = await getPhotos();
-  refs.gallery.innerHTML = renderGallery(photos, counter);
-  counter += 1;
+  const photos = await getPhotosList(fetchOptions);
+  if (isEmpty(photos.total)) {
+    messages.searchFailure();
+    return;
+  }
 
-  refs.gallery.insertAdjacentHTML('afterend', "<div class='trigger'></div>");
+  messages.numberOfResults(photos.total);
+  setMaxPage(photos.total);
+  addPhotosToGallery(photos.list);
+  pageCounter += 1;
+  createTriggerDiv();
+  addObserverToTriggerDiv();
+};
 
-  intersectionObserver.observe(document.querySelector('.trigger'));
+const observerFunc = async entries => {
+  if (isGalleryEnd()) {
+    intersectionObserver.disconnect();
+    messages.galleryEnd();
+    return;
+  }
+
+  if (entries[0].intersectionRatio <= 0) return;
+  const fetchOptions = {
+    name: refs.input.value,
+    page: pageCounter,
+    per_page: PHOTOS_PER_PAGE,
+  };
+
+  const photos = await getPhotosList(fetchOptions);
+
+  addPhotosToGallery(photos.list);
+
+  pageCounter++;
 };
 
 refs.form.addEventListener('submit', onclickSearchBtn);
-
-const observerFunc = async entries => {
-  if (entries[0].intersectionRatio <= 0) return;
-
-  const photos = await getPhotos();
-  renderGallery(photos, counter);
-
-  refs.gallery.insertAdjacentHTML('beforeend', renderGallery(photos, counter));
-  counter++;
-};
 
 const intersectionObserver = new IntersectionObserver(observerFunc);
