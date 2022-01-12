@@ -84,13 +84,14 @@ function checkLightBoxEnd() {
   const currentPage = document.querySelector('.sl-current');
   const total = document.querySelector('.sl-total');
   if (currentPage.textContent === total.textContent) {
+    lightbox.destroy();
     loadMorePhotos();
   }
 }
 
 function updateLightBox() {
   lightbox.refresh();
-  lightbox.on('next.simplelightbox', checkLightBoxEnd);
+  lightbox.on('nextDone.simplelightbox', checkLightBoxEnd);
 }
 
 const onclickSearchBtn = async e => {
@@ -122,7 +123,7 @@ const onclickSearchBtn = async e => {
 const observerFunc = async entries => {
   if (entries[0].intersectionRatio <= 0) return;
 
-  loadMorePhotos();
+  await loadMorePhotos();
 };
 
 refs.form.addEventListener('submit', onclickSearchBtn);
@@ -132,7 +133,6 @@ const intersectionObserver = new IntersectionObserver(observerFunc);
 const lightbox = new SimpleLightbox('.gallery a', {
   captionsData: 'alt',
   captionDelay: 250,
-  preloading: false,
 });
 
 const onClickImg = e => {
