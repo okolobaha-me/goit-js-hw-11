@@ -18,6 +18,8 @@ const refs = {
 let pageCounter = 0;
 let maxPage = 1;
 
+let links = {};
+
 function addPhotosToGallery(photos) {
   refs.gallery.insertAdjacentHTML('beforeend', renderGallery(photos, pageCounter));
 }
@@ -69,6 +71,7 @@ const onclickSearchBtn = async e => {
   pageCounter += 1;
   createTriggerDiv();
   addObserverToTriggerDiv();
+  lightbox.refresh();
 };
 
 const observerFunc = async entries => {
@@ -79,6 +82,7 @@ const observerFunc = async entries => {
   }
 
   if (entries[0].intersectionRatio <= 0) return;
+
   const fetchOptions = {
     name: refs.input.value,
     page: pageCounter,
@@ -88,10 +92,23 @@ const observerFunc = async entries => {
   const photos = await getPhotosList(fetchOptions);
 
   addPhotosToGallery(photos.list);
-
+  lightbox.refresh();
   pageCounter++;
 };
 
 refs.form.addEventListener('submit', onclickSearchBtn);
 
 const intersectionObserver = new IntersectionObserver(observerFunc);
+
+const lightbox = new SimpleLightbox('.gallery a', { captionsData: 'alt', captionDelay: 250 });
+
+const onClickImg = e => {
+  if (e.target.nodeName !== 'img') {
+    console.log(e.target.nodeName);
+    lightbox.open(e.target);
+    e.preventDefault();
+  }
+  console.log(e.target.nodeName);
+};
+
+refs.gallery.addEventListener('click', onClickImg);
